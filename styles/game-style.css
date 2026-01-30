@@ -10,10 +10,29 @@
     --grey: #A9BEC8;
     --light-yellow: #F2B138;
 }
-body, html {
+
+html, body, main {
     height: 100%;
 }
 
 body {
     background-color: var(--primary);
+}
+
+main {
+
+    display: grid;
+    grid-template-rows: 1fr 5fr 2fr;
+}
+
+main header {
+    background-color: green;
+}
+
+main .game-grid {
+    background-color: #F2B138;
+}
+
+main .score {
+    background-color: blue;
 }
