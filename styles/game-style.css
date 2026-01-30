@@ -1,0 +1,19 @@
+* {
+    padding: 0px;
+    margin: 0px;
+    box-sizing: content-box;
+}
+
+:root {
+    --primary: #1A2B33;
+    --secondary: #1E3640;
+    --grey: #A9BEC8;
+    --light-yellow: #F2B138;
+}
+body, html {
+    height: 100%;
+}
+
+body {
+    background-color: var(--primary);
+}

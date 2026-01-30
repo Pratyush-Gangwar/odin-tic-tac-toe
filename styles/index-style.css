@@ -92,7 +92,7 @@ main {
 
 }
 
-button {
+.start-button {
     color: var(--primary);
     background-color: var(--light-yellow);
 
@@ -108,4 +108,8 @@ button {
     border: none;
 
     box-shadow: inset 0 -3px 2px rgba(0, 0, 0, .3);
+
+    &:active {
+        box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.35);
+    }
 }
