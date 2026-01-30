@@ -139,4 +139,4 @@ function makeGameSession() {
 };
 
 const gameSession = makeGameSession();
-gameSession.start();
+// gameSession.start();
