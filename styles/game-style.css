@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
 * {
     padding: 0px;
     margin: 0px;
@@ -17,6 +19,7 @@ html, body, main {
 
 body {
     background-color: var(--primary);
+    font-family: 'Outfit', sans-serif;
 }
 
 main {
@@ -26,7 +29,37 @@ main {
 }
 
 main header {
-    background-color: green;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+
+    .turn-indicator {
+        border-radius: 10%;
+        background-color: #1E3640;
+        box-shadow: 0 10px 10px rgba(0, 0, 0, .3);
+        padding: 10px 25px;
+
+        display: flex;
+        gap: 10px;
+        align-items: center;
+
+        text-transform: uppercase;
+        color: var(--grey);
+
+        img {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    .reset-button {
+        background-color: var(--grey);
+        border: none;
+        height: 50px;
+        width: 50px;
+        border-radius: 10px;
+        box-shadow: 0 -5px 0px rgba(0, 0, 0, .3);
+    }
 }
 
 main .game-grid {
