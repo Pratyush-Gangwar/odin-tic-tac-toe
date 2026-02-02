@@ -13,7 +13,7 @@
     --light-yellow: #F2B138;
 }
 
-body, html, main {
+body, html {
     height: 100%;
 }
 
@@ -21,9 +21,17 @@ body {
     background-color: var(--primary);
     font-family: 'Outfit';
     text-transform: uppercase;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    padding: 10px;
 }
 
 main {
+    flex: 1;
+
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -93,6 +101,12 @@ main {
 }
 
 .start-button {
+    text-decoration: none;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     color: var(--primary);
     background-color: var(--light-yellow);
 
@@ -111,5 +125,15 @@ main {
 
     &:active {
         box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.35);
+    }
+}
+
+footer {
+    color: rgba(255, 255, 255, .4);
+    text-align: center;
+    
+    a {
+        text-decoration: none;
+        color: var(--light-yellow);
     }
 }
