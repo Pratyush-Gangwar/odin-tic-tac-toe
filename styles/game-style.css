@@ -11,6 +11,7 @@
     --secondary: #1E3640;
     --grey: #A9BEC8;
     --light-yellow: #F2B138;
+    --dark-cyan: #34C3BE;
 }
 
 html, body, main {
@@ -79,5 +80,30 @@ main .grid {
 }
 
 main .score {
-    background-color: blue;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 15px;
+
+    .score-item {
+        border-radius: 10px;
+        padding: 10px 20px;
+
+        width: 10vw;
+
+        text-align: center;
+        color: var(--primary)
+    }
+
+    .player-x-score {
+        background-color: var(--dark-cyan);
+    }
+
+    .tie-score {
+        background-color: var(--grey);
+    }
+
+    .player-o-score {
+        background-color: var(--light-yellow);
+    }
 }
