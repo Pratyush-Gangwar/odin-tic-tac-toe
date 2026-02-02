@@ -62,8 +62,20 @@ main header {
     }
 }
 
-main .game-grid {
-    background-color: #F2B138;
+main .grid {
+    display: grid;
+    grid-template-rows: repeat(3, 100px);
+    grid-template-columns: repeat(3, 100px);
+    gap: 1.7em;
+
+    place-content: center;
+
+    .cell {
+        background-color: rgb(30, 54, 64);;
+        border-radius: 10px;
+        border: 2px solid rgba(255, 255, 255, .2);
+        box-shadow: 0 10px 10px rgba(0, 0, 0, .5);
+    }
 }
 
 main .score {
