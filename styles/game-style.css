@@ -54,9 +54,10 @@ main header {
 
         color: var(--grey);
 
-        img {
+        svg {
             width: 20px;
             height: 20px;
+            fill: #A9BEC8;
         }
     }
 
@@ -67,6 +68,10 @@ main header {
         width: 50px;
         border-radius: 10px;
         box-shadow: 0 -5px 0px rgba(0, 0, 0, .3);
+
+        svg {
+            fill: #1F3641;
+        }
     }
 }
 
@@ -83,6 +88,36 @@ main .grid {
         border-radius: 10px;
         border: 2px solid rgba(255, 255, 255, .2);
         box-shadow: 0 10px 10px rgba(0, 0, 0, .5);
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        svg {
+            width: 66px;
+            height: 66px;
+        }
+
+        &.marked-x svg {
+            fill: #31C3BD;
+        }
+
+        &.marked-o svg {
+            fill: #F2B137;
+        }
+
+    }
+
+    &.turn-x .cell:not(.marked):hover {
+        background-image: url("../assets/img/icon-x-outline.svg");
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    &.turn-o .cell:not(.marked):hover {
+        background-image: url("../assets/img/icon-o-outline.svg");
+        background-repeat: no-repeat;
+        background-position: center;
     }
 }
 
@@ -96,7 +131,8 @@ main .score {
         border-radius: 10px;
         padding: 10px 20px;
 
-        width: 10vw;
+        width: 200px;
+        height: 75px;
 
         text-align: center;
         color: var(--primary)

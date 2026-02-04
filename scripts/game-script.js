@@ -1,3 +1,5 @@
+let turn = 'x';
+
 function Player(name, symbol) {
     this.name = name;
     this.symbol = symbol;
@@ -137,6 +139,31 @@ function makeGameSession() {
     return {start};
 
 };
+
+(function documentController() {
+    // Populate initial turn
+
+    const gridCells = document.querySelectorAll(".grid button");
+
+    gridCells.forEach( cell => {
+
+        cell.addEventListener("click", async () => {
+            // 
+            fetch(`./assets/img/${turn.toLowerCase()}-icon.svg`)
+                .then(res => res.text())
+                .then(svgText => {
+                    cell.classList.add(`marked-${turn.toLowerCase()}`);
+                    cell.classList.add("marked");
+
+                    cell.insertAdjacentHTML('beforeend', svgText); // to understand
+                    cell.disabled = true; 
+                });
+
+        });
+
+    });
+
+})();
 
 const gameSession = makeGameSession();
 // gameSession.start();
