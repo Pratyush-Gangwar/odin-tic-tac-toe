@@ -1,8 +1,30 @@
+`Since games can be restarted, the game board (and related methods) are best suited to be an object. However, we want the board to be truly private and so we use an object factory over constructor functions. 
+
+Similarly, game sessions should also be an object. We don't really need any private variables for it. So we could've used either object factories or constructor functions. We chose object factories since we had already used them. `
+
 let turn = 'x';
 
-function Player(name, symbol) {
-    this.name = name;
-    this.symbol = symbol;
+function invertTurn() {
+    const grid = document.querySelector('.grid');
+    grid.classList.remove(`turn-${turn}`);
+
+    if (turn === 'x') turn = 'o';
+    else if (turn === 'o') turn = 'x';
+
+    grid.classList.add(`turn-${turn}`);
+
+    updateTurnIndicator();
+}
+
+function updateTurnIndicator() {
+    const svgContainer = document.querySelector('.turn-indicator .svg-container');
+
+    fetch(`./assets/img/${turn}-icon.svg`)
+    .then(res => res.text())
+    .then(svgText => {
+        svgContainer.innerHTML = svgText;
+    });
+    
 }
 
 function makeGameState() {
@@ -88,18 +110,6 @@ function makeGameState() {
 
 function makeGameSession() {
 
-    function getPlayers() {
-        const name1 = prompt("Player 1, enter your name: ");
-        const symbol1 = prompt("Player 1, enter your symbol (X/O): ");
-        const player1 = new Player(name1, symbol1);
-
-        const name2 = prompt("Player 2, enter your name: ");
-        const symbol2 = (symbol1 === 'O' ? 'X' : 'O');
-        const player2 = new Player(name2, symbol2);
-
-        return {player1, player2};
-    }
-
     function start() {
         const players = getPlayers();
         const gameState = makeGameState();
@@ -148,15 +158,17 @@ function makeGameSession() {
     gridCells.forEach( cell => {
 
         cell.addEventListener("click", async () => {
-            // 
-            fetch(`./assets/img/${turn.toLowerCase()}-icon.svg`)
+            
+            fetch(`./assets/img/${turn}-icon.svg`)
                 .then(res => res.text())
                 .then(svgText => {
-                    cell.classList.add(`marked-${turn.toLowerCase()}`);
+                    cell.classList.add(`marked-${turn}`);
                     cell.classList.add("marked");
 
-                    cell.insertAdjacentHTML('beforeend', svgText); // to understand
+                    cell.innerHTML = svgText; // to understand
                     cell.disabled = true; 
+
+                    invertTurn();
                 });
 
         });
