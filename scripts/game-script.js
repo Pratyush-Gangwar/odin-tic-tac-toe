@@ -13,9 +13,9 @@ function sleep(ms) {
 }
 
 function Score() {
-    this["x-score"] = 0;
-    this["o-score"] = 0;
-    this.draws = 0;
+    this.x = 0;
+    this.o = 0;
+    this.draw = 0;
 }
 
 function makeGameState() {
@@ -127,8 +127,24 @@ const score = new Score();
 
 (function documentController() {
 
+    function updateScoreDOM() {
+        const scoreElem = document.querySelector(".score");
+        const xScoreElem = scoreElem.querySelector(".x-score h2");
+        xScoreElem.textContent = score.x;
+
+        const oScoreElem = scoreElem.querySelector(".o-score h2");
+        oScoreElem.textContent = score.o;
+
+        const drawScoreElem = scoreElem.querySelector(".draw-score h2");
+        drawScoreElem.textContent = score.draw;
+
+    }
+
     function resetDOMBoard() {
         const grid = document.querySelector(".grid");
+
+        grid.classList.remove("turn-x");
+        grid.classList.add("turn-o");
 
         for (const child of grid.children) {
             child.classList.remove("marked");
@@ -149,11 +165,14 @@ const score = new Score();
         }
     }
 
-    function updateTurnDOM(oldTurn, newTurn) {
+    function updateTurnDOM() {
         const grid = document.querySelector('.grid');
 
-        grid.classList.remove(`turn-${oldTurn}`);
-        grid.classList.add(`turn-${newTurn}`);
+        // Remove either
+        grid.classList.remove("turn-o");
+        grid.classList.remove("turn-x");
+
+        grid.classList.add(`turn-${gameState.getTurn()}`);
 
         updateTurnIndicator();
     }
@@ -177,31 +196,33 @@ const score = new Score();
         cell.disabled = true; 
     }
 
+    async function handleEnd(type) {
+        disableBoard();
+        await sleep(1500);
+
+        score[`${type}`]++;
+        updateScoreDOM();
+
+        gameState.reset();
+        resetDOMBoard();
+        updateTurnDOM();
+    }
+
     async function updateGameState(row, col) {
-        let oldTurn = gameState.getTurn();
         gameState.placeCurrentTurn(row, col);
 
         if (gameState.hasCurrentTurnWon()) {
-            console.log(`Turn ${gameState.getTurn()} won!`);
-            
-
-            disableBoard();
-            await sleep(1500);
-
-            gameState.reset();
-            resetDOMBoard();
-
+            handleEnd(gameState.getTurn());
             return;
         }
 
         else if (gameState.getMoves() == 9) {
-            console.log("It's draw!");
+            handleEnd("draw");
             return;
         }
 
         gameState.invertTurn();
-        let newTurn = gameState.getTurn();
-        updateTurnDOM(oldTurn, newTurn);
+        updateTurnDOM();
 
     }
 

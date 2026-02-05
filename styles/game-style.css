@@ -143,15 +143,15 @@ main .score {
         color: var(--primary)
     }
 
-    .player-x-score {
+    .x-score {
         background-color: var(--dark-cyan);
     }
 
-    .tie-score {
+    .draw-score {
         background-color: var(--grey);
     }
 
-    .player-o-score {
+    .o-score {
         background-color: var(--light-yellow);
     }
 }
