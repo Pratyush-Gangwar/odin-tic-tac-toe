@@ -1,41 +1,35 @@
-`Since games can be restarted, the game board (and related methods) are best suited to be an object. However, we want the board to be truly private and so we use an object factory over constructor functions. 
+/*
+Since games can be restarted, the game board (and related methods) are best suited to be an object. However, we want the board to be truly private and so we use an object factory over constructor functions. 
 
-Similarly, game sessions should also be an object. We don't really need any private variables for it. So we could've used either object factories or constructor functions. We chose object factories since we had already used them. `
+Similarly, game sessions should also be an object. We don't really need any private variables for it. So we could've used either object factories or constructor functions. We chose object factories since we had already used them.
 
-let turn = 'x';
+TODO:
+disabled still shows hover
+*/
 
-function invertTurn() {
-    const grid = document.querySelector('.grid');
-    grid.classList.remove(`turn-${turn}`);
 
-    if (turn === 'x') turn = 'o';
-    else if (turn === 'o') turn = 'x';
-
-    grid.classList.add(`turn-${turn}`);
-
-    updateTurnIndicator();
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function updateTurnIndicator() {
-    const svgContainer = document.querySelector('.turn-indicator .svg-container');
-
-    fetch(`./assets/img/${turn}-icon.svg`)
-    .then(res => res.text())
-    .then(svgText => {
-        svgContainer.innerHTML = svgText;
-    });
-    
+function Score() {
+    this["x-score"] = 0;
+    this["o-score"] = 0;
+    this.draws = 0;
 }
 
 function makeGameState() {
-    const board = Array.from({ length: 3 }, () => Array(3).fill('.')); // private
+    let moves = 0;
+    let turn = 'x';
 
-    function hasPlayerWonRow(player) {
+    let board = Array.from({ length: 3 }, () => Array(3).fill('.')); // private
+
+    function hasCurrentTurnWonRow() {
         for(const row of board) {
             let won = true;
 
             for(const cell of row) {
-                if (cell != player.symbol) {
+                if (cell != turn) {
                     won = false;
                     break;
                 }
@@ -47,12 +41,12 @@ function makeGameState() {
         return false;
     }  
 
-    function hasPlayerWonCol(player) {
+    function hasCurrentTurnWonCol() {
         for(let j = 0; j < board.length; j++) {
             let won = true;
             
             for(let i = 0; i < board.length; i++) {
-                if (board[i][j] != player.symbol) {
+                if (board[i][j] != turn) {
                     won = false;
                     break;
                 }
@@ -64,12 +58,12 @@ function makeGameState() {
         return false;
     }
 
-    function hasPlayerWonDiag(player) {
+    function hasCurrentTurnWonDiag() {
         // Left
         let won = true;
 
         for (let i = 0; i < board.length; i++) {
-            if (board[i][i] != player.symbol) {
+            if (board[i][i] != turn) {
                 won = false;
                 break;
             }
@@ -80,7 +74,7 @@ function makeGameState() {
         // Right
         won = true;
         for (let i = 0; i < board.length; i++) {
-            if (board[i][board.length - 1 - i] != player.symbol) {
+            if (board[i][board.length - 1 - i] != turn) {
                 won = false;
                 break;
             }
@@ -89,12 +83,32 @@ function makeGameState() {
         return won;
     }
 
-    function hasPlayerWon(player) {
-        return hasPlayerWonRow(player) || hasPlayerWonCol(player) || hasPlayerWonDiag(player);
+    function hasCurrentTurnWon() {
+        return hasCurrentTurnWonRow() || hasCurrentTurnWonCol() || hasCurrentTurnWonDiag();
     }
 
-    function place(i, j, symbol) {
-        board[i][j] = symbol;
+    function placeCurrentTurn(i, j) {
+        board[i][j] = turn;
+        moves++;
+    }
+
+    function invertTurn() {
+        if (turn === 'x') turn = 'o';
+        else if (turn === 'o') turn = 'x';
+    }
+
+    function reset() {
+        moves = 0;
+        turn = 'x';
+        board = Array.from({ length: 3 }, () => Array(3).fill('.'));
+    }
+
+    function getMoves() {
+        return moves;
+    }
+
+    function getTurn() {
+        return turn;
     }
 
     function printBoard() {
@@ -104,78 +118,116 @@ function makeGameState() {
     }
 
     return {
-        hasPlayerWon, place, printBoard
+        hasCurrentTurnWon, placeCurrentTurn, printBoard, getMoves, reset, getTurn, invertTurn
     };
 };
 
-function makeGameSession() {
+const gameState = makeGameState();
+const score = new Score();
 
-    function start() {
-        const players = getPlayers();
-        const gameState = makeGameState();
+(function documentController() {
 
-        let moves = 0;
-        let gameFinished = false;
+    function resetDOMBoard() {
+        const grid = document.querySelector(".grid");
 
-        while (!gameFinished) {
+        for (const child of grid.children) {
+            child.classList.remove("marked");
+            child.classList.remove("marked-x");
+            child.classList.remove("marked-o");
+
+            child.disabled = false;
+
+            child.replaceChildren();
+        }
+    }
+
+    function disableBoard() {
+        const grid = document.querySelector(".grid");
+
+        for (const child of grid.children) {
+            child.disabled = true;
+        }
+    }
+
+    function updateTurnDOM(oldTurn, newTurn) {
+        const grid = document.querySelector('.grid');
+
+        grid.classList.remove(`turn-${oldTurn}`);
+        grid.classList.add(`turn-${newTurn}`);
+
+        updateTurnIndicator();
+    }
+
+    function updateTurnIndicator() {
+        const svgContainer = document.querySelector('.turn-indicator .svg-container');
+
+        fetch(`./assets/img/${gameState.getTurn()}-icon.svg`)
+        .then(res => res.text())
+        .then(svgText => {
+            svgContainer.innerHTML = svgText;
+        });
+        
+    }
+
+    function markCell(cell, svgText) {
+        cell.classList.add(`marked-${gameState.getTurn()}`);
+        cell.classList.add("marked");
+
+        cell.innerHTML = svgText; 
+        cell.disabled = true; 
+    }
+
+    async function updateGameState(row, col) {
+        let oldTurn = gameState.getTurn();
+        gameState.placeCurrentTurn(row, col);
+
+        if (gameState.hasCurrentTurnWon()) {
+            console.log(`Turn ${gameState.getTurn()} won!`);
             
-            for(const player of Object.values(players)) {
-                gameState.printBoard();
 
-                const row = prompt(`Player ${player.name}, enter your row: `);
-                const col = prompt(`Player ${player.name}, enter your col: `);
+            disableBoard();
+            await sleep(1500);
 
-                gameState.place(row, col, player.symbol);
-                moves++;
+            gameState.reset();
+            resetDOMBoard();
 
-                if (gameState.hasPlayerWon(player)) {
-                    gameState.printBoard();
-                    console.log(`Player ${player.name} won!`);
-                    gameFinished = true;
-                    break;
-                }
+            return;
+        }
 
-                else if (moves == 9) {
-                    gameState.printBoard();
-                    console.log("It's draw!");
-                    gameFinished = true;
-                    break;
-                }
+        else if (gameState.getMoves() == 9) {
+            console.log("It's draw!");
+            return;
+        }
 
+        gameState.invertTurn();
+        let newTurn = gameState.getTurn();
+        updateTurnDOM(oldTurn, newTurn);
+
+    }
+
+    function initialize() {
+        const grid = document.querySelector(".grid");
+
+        for(let row = 0; row < 3; row++) {
+            for(let col = 0; col < 3; col++) {
+                
+                const cell = document.createElement("button");
+                cell.classList.add("cell");
+
+                cell.addEventListener("click", async () => {
+                    fetch(`./assets/img/${gameState.getTurn()}-icon.svg`)
+                        .then(res => res.text())
+                        .then(svgText => {
+                            markCell(cell, svgText);
+                            updateGameState(row, col);
+                        });
+                });
+
+                grid.appendChild(cell);
             }
         }
     }
 
-    return {start};
-
-};
-
-(function documentController() {
-    // Populate initial turn
-
-    const gridCells = document.querySelectorAll(".grid button");
-
-    gridCells.forEach( cell => {
-
-        cell.addEventListener("click", async () => {
-            
-            fetch(`./assets/img/${turn}-icon.svg`)
-                .then(res => res.text())
-                .then(svgText => {
-                    cell.classList.add(`marked-${turn}`);
-                    cell.classList.add("marked");
-
-                    cell.innerHTML = svgText; // to understand
-                    cell.disabled = true; 
-
-                    invertTurn();
-                });
-
-        });
-
-    });
-
+    initialize();
 })();
 
-const gameSession = makeGameSession();
-// gameSession.start();
