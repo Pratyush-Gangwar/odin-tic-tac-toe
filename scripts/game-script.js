@@ -1,10 +1,5 @@
 /*
-Since games can be restarted, the game board (and related methods) are best suited to be an object. However, we want the board to be truly private and so we use an object factory over constructor functions. 
-
-Similarly, game sessions should also be an object. We don't really need any private variables for it. So we could've used either object factories or constructor functions. We chose object factories since we had already used them.
-
-TODO:
-disabled still shows hover
+Since games can be restarted, the game state (and related methods) are best suited to be an object. However, we want the board to be truly private and so we use an object factory over constructor functions. 
 */
 
 
@@ -24,41 +19,41 @@ function makeGameState() {
 
     let board = Array.from({ length: 3 }, () => Array(3).fill('.')); // private
 
-    function hasCurrentTurnWonRow() {
-        for(const row of board) {
+    function getWinningRowIDs() {
+        for(let rowIdx = 0; rowIdx < board.length; rowIdx++) {
             let won = true;
 
-            for(const cell of row) {
+            for(const cell of board[rowIdx]) {
                 if (cell != turn) {
                     won = false;
                     break;
                 }
             }
 
-            if (won) return true;
+            if (won) return [ rowIdx * 3, rowIdx * 3 + 1, rowIdx * 3 + 2 ]
         }
 
-        return false;
+        return [];
     }  
 
-    function hasCurrentTurnWonCol() {
-        for(let j = 0; j < board.length; j++) {
+    function getWinningColIDs() {
+        for(let colIdx = 0; colIdx < board.length; colIdx++) {
             let won = true;
             
-            for(let i = 0; i < board.length; i++) {
-                if (board[i][j] != turn) {
+            for(let rowIdx = 0; rowIdx < board.length; rowIdx++) {
+                if (board[rowIdx][colIdx] != turn) {
                     won = false;
                     break;
                 }
             }
 
-            if (won) return true;
+            if (won) return [ colIdx, colIdx + 3, colIdx + 6 ];
         }
 
-        return false;
+        return [];
     }
 
-    function hasCurrentTurnWonDiag() {
+    function getWinningDiagIDs() {
         // Left
         let won = true;
 
@@ -69,7 +64,7 @@ function makeGameState() {
             }
         }
 
-        if (won) return true;
+        if (won) return [0, 4, 8];
 
         // Right
         won = true;
@@ -80,11 +75,21 @@ function makeGameState() {
             }
         }
 
-        return won;
+        if (won) return [2, 4, 6];
+        else return [];
     }
 
-    function hasCurrentTurnWon() {
-        return hasCurrentTurnWonRow() || hasCurrentTurnWonCol() || hasCurrentTurnWonDiag();
+    function getWinningIDs() {
+        const winngRowIDs = getWinningRowIDs();
+        if (winngRowIDs.length !== 0) return winngRowIDs;
+
+        const winngColIDs = getWinningColIDs();
+        if (winngColIDs.length !== 0) return winngColIDs;
+
+        const winngDiagIDs = getWinningDiagIDs();
+        if (winngDiagIDs.length !== 0) return winngDiagIDs;
+
+        return [];
     }
 
     function placeCurrentTurn(i, j) {
@@ -118,7 +123,7 @@ function makeGameState() {
     }
 
     return {
-        hasCurrentTurnWon, placeCurrentTurn, printBoard, getMoves, reset, getTurn, invertTurn
+        getWinningIDs, placeCurrentTurn, printBoard, getMoves, reset, getTurn, invertTurn
     };
 };
 
@@ -147,12 +152,12 @@ const score = new Score();
         grid.classList.add("turn-o");
 
         for (const child of grid.children) {
-            child.classList.remove("marked");
             child.classList.remove("marked-x");
             child.classList.remove("marked-o");
+            child.classList.remove("won");
+            child.classList.remove("draw");
 
             child.disabled = false;
-
             child.replaceChildren();
         }
     }
@@ -190,8 +195,6 @@ const score = new Score();
 
     function markCell(cell, svgText) {
         cell.classList.add(`marked-${gameState.getTurn()}`);
-        cell.classList.add("marked");
-
         cell.innerHTML = svgText; 
         cell.disabled = true; 
     }
@@ -202,20 +205,40 @@ const score = new Score();
         updateTurnDOM();
     }
 
-    async function handleEnd(type) {
+    async function handleEnd(type, winningIDs) {
         disableBoard();
+
+        const cells = document.querySelectorAll('.grid .cell');
+
+        for(let cellID = 0; cellID < cells.length; cellID++) {
+            const cell = cells[cellID];
+
+            if (type === 'draw') {
+                cell.classList.add("draw");
+                cell.classList.remove(`marked-${gameState.getTurn()}`);
+            }
+
+            else if (type === 'won' && winningIDs.includes(cellID)) {
+                cell.classList.add( "won" );
+                cell.classList.remove(`marked-${gameState.getTurn()}`);
+            }
+            
+        }
+
         await sleep(1500);
 
-        score[`${type}`]++;
+        score[`${type === 'won' ? gameState.getTurn() : 'draw'}`]++;
         updateScoreDOM();
+
         sessionReset();
     }
 
     function updateGameState(row, col) {
         gameState.placeCurrentTurn(row, col);
+        const winningIDs = gameState.getWinningIDs();
 
-        if (gameState.hasCurrentTurnWon()) {
-            handleEnd(gameState.getTurn());
+        if (winningIDs.length != 0) {
+            handleEnd('won', winningIDs);
             return;
         }
 

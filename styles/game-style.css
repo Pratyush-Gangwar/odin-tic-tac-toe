@@ -113,17 +113,42 @@ main .grid {
 
     }
 
-    &.turn-x .cell:not(.marked):hover {
-        background-image: url("../assets/img/icon-x-outline.svg");
+    &.turn-x .cell:not(:disabled):hover {
+        background-image: url("../assets/img/x-icon-outline.svg");
         background-repeat: no-repeat;
         background-position: center;
     }
 
-    &.turn-o .cell:not(.marked):hover {
-        background-image: url("../assets/img/icon-o-outline.svg");
+    &.turn-o .cell:not(:disabled):hover {
+        background-image: url("../assets/img/o-icon-outline.svg");
         background-repeat: no-repeat;
         background-position: center;
     }
+
+    &.turn-x .cell.won {
+        background-color: #31C3BD;
+
+        svg {
+            fill: rgb(30, 54, 64);
+        }
+    }
+
+    &.turn-o .cell.won {
+        background-color: #F2B137;
+
+        svg {
+            fill: rgb(30, 54, 64);
+        }
+    }
+
+    .cell.draw {
+        background-color: #2E3E44;
+
+        svg {
+            fill: #8FA3AD;
+        }
+    }
+
 }
 
 main .score {
