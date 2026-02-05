@@ -196,19 +196,22 @@ const score = new Score();
         cell.disabled = true; 
     }
 
+    function sessionReset() {
+        gameState.reset();
+        resetDOMBoard();
+        updateTurnDOM();
+    }
+
     async function handleEnd(type) {
         disableBoard();
         await sleep(1500);
 
         score[`${type}`]++;
         updateScoreDOM();
-
-        gameState.reset();
-        resetDOMBoard();
-        updateTurnDOM();
+        sessionReset();
     }
 
-    async function updateGameState(row, col) {
+    function updateGameState(row, col) {
         gameState.placeCurrentTurn(row, col);
 
         if (gameState.hasCurrentTurnWon()) {
@@ -247,6 +250,9 @@ const score = new Score();
                 grid.appendChild(cell);
             }
         }
+
+        const resetBtn = document.querySelector(".reset-button");
+        resetBtn.addEventListener("click", () => sessionReset() );
     }
 
     initialize();
